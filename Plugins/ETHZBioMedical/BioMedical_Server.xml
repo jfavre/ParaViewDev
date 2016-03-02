@@ -1,0 +1,255 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+    <SourceProxy name="BioMaskH5" class="vtkETHZBioMedicalMaskHDF5Reader" label="Masked HDF5 reader">
+    <OutputPort name="Hexahedral Grid" index="0" />
+<!--
+    <OutputPort name="Voxel Grid" index="1" />
+-->
+     <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+     </StringVectorProperty>
+     
+     <StringVectorProperty
+        name="HDF5FileName"
+        command="SetHDF5FileName"
+        animateable="0"
+        number_of_elements="1">
+       <FileListDomain name="files"/>
+       <Documentation>
+         This property specifies the .h5 (HDF5 file) file name for the HDF5 reader.
+       </Documentation>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="MaskArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Mask"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="MaskStatus"
+        command="SetMaskStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="MaskArrayInfo">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="MaskArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Point"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayStatus"
+        command="SetPointArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="PointArrayInfo">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="PointArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="CellArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Cell"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="CellArrayStatus"
+        command="SetCellArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="CellArrayInfo">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="CellArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+     <Hints>
+       <ReaderFactory extensions="aimfoo"
+                      file_description="ETH-Z BioMedical HDF5 Files with AIM Mask Files" />
+     </Hints>
+   </SourceProxy>
+
+    <SourceProxy name="BioH5" class="vtkETHZBioMedicalHDF5Reader" label="HDF5 reader">
+     <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Point"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayStatus"
+        command="SetPointArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="PointArrayInfo"
+        label="Point Arrays">>
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="PointArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="CellArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Cell"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="CellArrayStatus"
+        command="SetCellArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="CellArrayInfo"
+	label="Cell Arrays">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="CellArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+
+	<DoubleVectorProperty
+	name="TimestepValues"
+        repeatable="1"
+	information_only="1">
+	<TimeStepsInformationHelper/>
+	<Documentation>
+		Available timestep values.
+	</Documentation>
+	</DoubleVectorProperty>
+
+     <IntVectorProperty 
+        name="SortByMaterials" 
+        command="SetSortByMaterials"
+        number_of_elements="1"
+        default_values="1"
+        label="Sort By Materials?">
+      <BooleanDomain name="bool" />
+      <Documentation>
+            Stores each material in a different mesh.
+      </Documentation>
+     </IntVectorProperty>
+
+     <Hints>
+       <ReaderFactory extensions="h5"
+                      file_description="ETH-Z BioMedical HDF5 Files" />
+     </Hints>
+   </SourceProxy>
+
+   <SourceProxy name="BioMesh" class="vtkETHZBioMedicalFAIMReader" label="Mesh reader">
+     <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Point"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayStatus"
+        command="SetPointArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="PointArrayInfo">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="PointArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="CellArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Cell"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="CellArrayStatus"
+        command="SetCellArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="CellArrayInfo">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="CellArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+     <Hints>
+       <ReaderFactory extensions="disp disps"
+                      file_description="ETH-Z BioMedical Mesh Files" />
+     </Hints>
+    </SourceProxy>
+
+   <SourceProxy name="AIMReader"
+                class="vtkAIMReader"
+                label="AIM reader">
+     <Documentation
+       short_help="Read a AIM file."
+       long_help="Read a AIM file into an image data.">
+       The AIM reader reads AIM (Scanco Any Image) files, and the output is a uniform rectilinear (image/volume) dataset. The default file extension is .aim.
+     </Documentation>
+     <StringVectorProperty
+        name="FileName"
+        animateable="0"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+        <Documentation>
+          This property specifies the file name for the AIM reader.
+        </Documentation>
+     </StringVectorProperty>
+     <Hints>
+       <ReaderFactory extensions="aim"
+                      file_description="Scanco Any Image" />
+     </Hints>
+   <!-- End AIMReader -->
+   </SourceProxy>
+
+  </ProxyGroup>
+</ServerManagerConfiguration>	
