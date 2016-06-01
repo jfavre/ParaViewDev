@@ -31,7 +31,13 @@
 #include <vector>
 using namespace std;
 
-#include <mpi.h>
+#include "vtkPVConfig.h"
+#ifdef PARAVIEW_USE_MPI
+  #include "vtkMPI.h"
+  #include "vtkMPIController.h"
+  #include "vtkMPICommunicator.h"
+#endif
+
 #include <set>
 #include <sstream>
 hid_t    file_id;
@@ -724,6 +730,7 @@ typedef struct material
 
       Materials_Found = true;
       }
+#ifdef PARAVIEW_USE_MPI
     else
       { // sort the local array, unique() it, send to master process for gathering, sorting and re-unique() fnal result, then scatter final result
       std::sort(material_fv.begin(), material_fv.end());
@@ -809,6 +816,7 @@ And, create receive buffers
 #endif
       Materials_Found = true;
       }
+#endif
       H5Dclose(ids_id);
     } // Emoduli case
 

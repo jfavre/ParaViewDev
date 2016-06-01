@@ -632,13 +632,23 @@ typedef unsigned short	D1ushort;
 typedef long		D1long;
 typedef unsigned long   D1ulong;
 
-typedef __int64 int64,D1int,D1boolean,*int64P;
-typedef __int64 D1int64, *D1int64P;
-typedef __int32 int32,*int32P,D1int32, *D1int32P,D1boolean32;
+#ifdef __GNUC__
+typedef signed long long int64,D1int,D1boolean,*int64P;
+typedef signed long long D1int64, *D1int64P;
+typedef signed long int int32,*int32P,D1int32, *D1int32P,D1boolean32;
 /** a long is suposed to be 32 bit**/
-typedef short int16;
+typedef unsigned long long D1uint64,D1uint;
+typedef unsigned long int D1uint32;
+#else
+typedef signed __int64 int64,D1int,D1boolean,*int64P;
+typedef signed __int64 D1int64, *D1int64P;
+typedef signed __int32 int32,*int32P,D1int32, *D1int32P,D1boolean32;
+/** a long is suposed to be 32 bit**/
 typedef unsigned __int64 D1uint64,D1uint;
 typedef unsigned __int32 D1uint32;
+#endif
+
+typedef short int16;
 
 typedef float		D1float;    /* als double def um round errors zu det. */
 
