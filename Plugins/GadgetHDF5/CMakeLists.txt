@@ -1,0 +1,19 @@
+SET(PLUGIN_NAME Gadget)
+SET(PLUGIN_VERSION "1.0")
+
+INCLUDE_DIRECTORIES(
+  ${VTK_INCLUDE_DIRS}
+  )
+
+ADD_PARAVIEW_PLUGIN(${PLUGIN_NAME} ${PLUGIN_VERSION}
+  SERVER_MANAGER_SOURCES
+    vtkGadgetReader.cxx
+
+  SERVER_MANAGER_XML
+    Gadget_Server.xml
+
+  REQUIRED_ON_SERVER
+)
+
+target_link_libraries(Gadget LINK_PRIVATE vtksys)
+
