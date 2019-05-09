@@ -1,0 +1,67 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+    <SourceProxy name="Gadget" class="vtkGadgetReader" label="Gadget reader (directory)">
+     <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+     </StringVectorProperty>
+     
+     <StringVectorProperty
+        name="PointArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Point"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayStatus"
+        command="SetPointArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="PointArrayInfo">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="PointArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+     </StringVectorProperty>
+      <IntVectorProperty command="SetCellType"
+                         default_values="0"
+                         name="CellType"
+                         number_of_elements="1">
+        <EnumerationDomain name="enum">
+          <Entry text="None"
+                 value="0" />
+          <Entry text="Vertex"
+                 value="1" />
+          <Entry text="Poly-Vertex"
+                 value="2" />
+        </EnumerationDomain>
+      </IntVectorProperty>
+      <Hints>
+        <ReaderFactory extensions="hdf5"
+                       file_description="Gadget Files (directory)" />
+      </Hints>
+      <StringVectorProperty animateable="0"
+                            command="SetDirectoryName"
+                            name="FileName"
+                            number_of_elements="1"
+                            panel_visibility="never">
+        <FileListDomain name="files" />
+        <Documentation>
+          A file in the directory of files to be loaded. The Gadget reader
+          will actually load all valid HDF5 snapshot files in the same directory as
+          this file as part of the same dataset. This is typical of how
+          Gadget files are often stored.
+        </Documentation>
+        <Hints>
+          <UseDirectoryName />
+        </Hints>
+      </StringVectorProperty>
+   </SourceProxy>
+
+  </ProxyGroup>
+</ServerManagerConfiguration>	
