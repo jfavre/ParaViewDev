@@ -1,0 +1,9 @@
+NAME
+  pvHDF5Reader
+DESCRIPTION
+  Reader for ExternalData/Testing/Data/Test1.h5
+REQUIRES_MODULES
+  ParaView::Core
+  VTK::CommonCore
+  VTK::CommonExecutionModel
+  VTK::hdf5

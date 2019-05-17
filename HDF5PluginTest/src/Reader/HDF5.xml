@@ -1,0 +1,23 @@
+<ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+    <SourceProxy name="HDF5Reader" class="vtkHDF5Reader" label="HDF5 Test reader">
+    <Documentation>
+	   short_help="Reads an HDF5 file with simulation results"
+       long_help="Reads an HDF5 file with  simulation results.">
+       This reader reads HDF5 files, and the output is Unstructured Grid.
+	</Documentation>
+     <StringVectorProperty
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+     </StringVectorProperty>
+
+
+     <Hints>
+       <ReaderFactory extensions="h5"
+                      file_description="TEST HDF5 Files" />
+     </Hints>
+   </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>	
