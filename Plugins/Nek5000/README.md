@@ -2,14 +2,14 @@ This is a plugin source code for the NEK5000 data format, compatible with the up
 
 How to compile:
 
-Use ParaView master (as of June 11, 2019)
+  Use ParaView master (as of June 11, 2019)
 
-cd Nek5000
+  cd Nek5000
 
-mkdir build
+  mkdir build
 
-cd build
+  cd build
 
-cmake ../
+  cmake ../
 
-make
+  make
