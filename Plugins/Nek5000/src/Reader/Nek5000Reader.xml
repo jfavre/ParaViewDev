@@ -1,0 +1,87 @@
+ <ServerManagerConfiguration>
+  <ProxyGroup name="sources">
+   <SourceProxy name="Nek5000Reader"  class="vtkNek5000Reader" label="nek5000 data reader">
+     <Documentation
+       short_help="Read a Nek5000 file."
+       long_help="Read a Nek5000 file into an unstructured grid.">
+       The Nek5000 reader reads Nek5000 f* files, generating output in an unstructured grid dataset.
+     </Documentation>
+
+     <OutputPort name="Continuum Field" index="0"/>
+ 
+     <StringVectorProperty
+        animateable="0"
+        name="FileName"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+     </StringVectorProperty>
+
+     <DoubleVectorProperty
+        name="TimestepValues"
+        repeatable="1"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+     </DoubleVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="Point"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="PointArrayStatus"
+        command="SetPointArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="PointArrayInfo"
+        label="Variables">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="PointArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+       <Documentation>
+         This property lists which point-centered arrays to read.
+       </Documentation>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="DerivedVariableArrayInfo"
+        information_only="1">
+        <ArraySelectionInformationHelper attribute_name="DerivedVariable"/>
+     </StringVectorProperty>
+
+     <StringVectorProperty
+        name="DerivedVariableArrayStatus"
+        command="SetDerivedVariableArrayStatus"
+        number_of_elements="0"
+        repeat_command="1"
+        number_of_elements_per_command="2"
+        element_types="2 0"
+        information_property="DerivedVariableArrayInfo"
+        label="Derived Quantities">
+       <ArraySelectionDomain name="array_list">
+          <RequiredProperties>
+             <Property name="DerivedVariableArrayInfo" function="ArrayList"/>
+          </RequiredProperties>
+       </ArraySelectionDomain>
+       <Documentation>
+         This property lists which derived quantities to generate.
+       </Documentation>
+     </StringVectorProperty>
+     
+     <Hints>
+       <ReaderFactory extensions="nek5000"
+                      file_description="NEK5000 CFD results files (Plugin)" />
+     </Hints>
+   </SourceProxy>
+  </ProxyGroup>
+</ServerManagerConfiguration>
+

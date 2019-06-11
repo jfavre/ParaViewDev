@@ -1,0 +1,9 @@
+NAME
+  Nek5000Reader
+LIBRARY_NAME
+  Nek5000Reader
+DEPENDS
+  VTK::CommonCore
+  VTK::CommonExecutionModel
+PRIVATE_DEPENDS
+  ParaView::Core
