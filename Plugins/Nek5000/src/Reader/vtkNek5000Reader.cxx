@@ -33,7 +33,7 @@ int compare_ids(const void *id1, const void *id2);
 //----------------------------------------------------------------------------
 
 vtkNek5000Reader::vtkNek5000Reader(){
-  this->DebugOn();
+  this->DebugOff();
   //vtkDebugMacro(<<"vtkNek5000Reader::vtkNek5000Reader(): ENTER");
 
   // by default assume filters have one input and one output
@@ -75,8 +75,8 @@ vtkNek5000Reader::vtkNek5000Reader(){
 
   this->PointDataArraySelection = vtkDataArraySelection::New();
 
-  this->DerivedVariableDataArraySelection = vtkDataArraySelection::New();
-  this->DisableAllDerivedVariableArrays();
+  //this->DerivedVariableDataArraySelection = vtkDataArraySelection::New();
+  //this->DisableAllDerivedVariableArrays();
 
   this->myList = new nek5KList();
 }
@@ -133,7 +133,7 @@ vtkNek5000Reader::~vtkNek5000Reader()
     free(this->var_names);
   this->PointDataArraySelection->Delete();
 
-  this->DerivedVariableDataArraySelection->Delete();
+  //this->DerivedVariableDataArraySelection->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -256,8 +256,8 @@ unsigned long vtkNek5000Reader::GetMTime()
   time = this->PointDataArraySelection->GetMTime();
   mTime = ( time > mTime ? time : mTime );
 
-  time = this->DerivedVariableDataArraySelection->GetMTime();
-  mTime = ( time > mTime ? time : mTime );
+  //time = this->DerivedVariableDataArraySelection->GetMTime();
+  //mTime = ( time > mTime ? time : mTime );
 
   return mTime;
 }
@@ -317,6 +317,7 @@ void vtkNek5000Reader::DisableAllPointArrays()
   this->PointDataArraySelection->DisableAllArrays();
 }
 
+#ifdef unused
 //----------------------------------------------------------------------------
 int vtkNek5000Reader::GetNumberOfDerivedVariableArrays()
 {
@@ -359,7 +360,7 @@ void vtkNek5000Reader::DisableAllDerivedVariableArrays()
 {
   this->DerivedVariableDataArraySelection->DisableAllArrays();
 }
-
+#endif
 //----------------------------------------------------------------------------
 
 void vtkNek5000Reader::updateVariableStatus()
@@ -527,7 +528,7 @@ vtkDebugMacro(<< "GetVariableNamesFromData:  this->var_names[" << this->num_vars
     
   } // while(ind<len)
 
-  this->DisableAllDerivedVariableArrays();
+  //this->DisableAllDerivedVariableArrays();
 
   return len;
 }
@@ -784,9 +785,9 @@ void vtkNek5000Reader::partitionAndReadMesh()
 
   this->totalBlockSize =  this->blockDims[0] *  this->blockDims[1] *  this->blockDims[2];
   if(this->blockDims[2] > 1)
-    MeshIs3D = true;
+    this->MeshIs3D = true;
   else
-    MeshIs3D = false;
+    this->MeshIs3D = false;
   std::cerr << "3DMesh is " << MeshIs3D << ", totalBlockSize = " << this->blockDims[0] <<"*"<<  this->blockDims[1] <<"*"<<  this->blockDims[2] <<"="<< this->totalBlockSize << std::endl;
 
   float test;
@@ -818,7 +819,7 @@ void vtkNek5000Reader::partitionAndReadMesh()
   for(i=0; i<num_ranks; i++)
   {
     this->proc_numBlocks[i] = elements_per_proc + (i<one_extra_until ? 1 : 0 );
-    cout <<"Proc "<<i<< " has "<< this->proc_numBlocks[i]<<" blocks"<<endl;
+    std::cerr <<"Proc "<< i << " has "<< this->proc_numBlocks[i]<<" blocks"<<endl;
   }
   this->myNumBlocks = this->proc_numBlocks[my_rank];
   this->myBlockIDs = new int[this->myNumBlocks];
@@ -1528,7 +1529,7 @@ void vtkNek5000Reader::updateVtuData(vtkUnstructuredGrid* pv_ugrid)
     points = vtkSmartPointer<vtkPoints>::New();
     points->SetNumberOfPoints(Nvert_total);
 
-    std::cerr << __LINE__ <<" : updateVtuData : rank = "<<my_rank<<": Nelements_total = "<<Nelements_total<<" Nvert_total = "<< Nvert_total;
+    std::cout << __LINE__ <<" : updateVtuData : rank = "<<my_rank<<": Nelements_total = "<<Nelements_total<<" Nvert_total = "<< Nvert_total << std::endl;
 
     copyContinuumPoints(points);
 
@@ -1546,7 +1547,8 @@ void vtkNek5000Reader::updateVtuData(vtkUnstructuredGrid* pv_ugrid)
   if (this->CALC_GEOM_FLAG)
     {
     addCellsToContinuumMesh();
-    addSpectralElementId(Nelements_total);
+    if(this->SpectralElementIds)  // optional. If one wants to extract cells belonging to specific spectral element(s)
+      addSpectralElementId(Nelements_total);
     this->UGrid->SetPoints(points);
     }
 
@@ -1567,7 +1569,7 @@ void vtkNek5000Reader::updateVtuData(vtkUnstructuredGrid* pv_ugrid)
   vtkDebugMacro(<< "updateVtuData: my_rank= " << my_rank<<": time to clean the grid: "<< timer_diff);
 
   timer->StartTimer();
-  pv_ugrid->ShallowCopy(this->UGrid);
+  pv_ugrid->ShallowCopy(clean->GetOutput());
 
   vtkDebugMacro(<< "updateVtuData: my_rank= " << my_rank<<":  completed ShallowCopy to pv_ugrid\n");
   if(this->curObj->ugrid)
@@ -1781,7 +1783,6 @@ void vtkNek5000Reader::copyContinuumData(vtkUnstructuredGrid* pv_ugrid)
   {
     if(this->use_variable[v_index])
     {
-      vtkDebugMacro(<< "copyContinuumData: my_rank= " << my_rank<<": var["<<v_index<<"] ("<< this->var_names[v_index]<<") is used, copy it");
       // if this is a scalar
       if(this->var_length[v_index] == 1)
       {

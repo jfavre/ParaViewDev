@@ -89,6 +89,12 @@ class NEK5000READER_EXPORT vtkNek5000Reader : public vtkUnstructuredGridAlgorith
   // the input.
   const char* GetPointArrayName(int index);
 
+
+// used for ParaView to decide if showing the spectral elements ids as cell-data
+  vtkSetMacro(SpectralElementIds, int); 
+  vtkGetMacro(SpectralElementIds, int);
+  vtkBooleanMacro(SpectralElementIds, int);
+  
   // Description:
   // Get/Set whether the point array with the given name or index is to
   // be read.
@@ -171,7 +177,7 @@ class NEK5000READER_EXPORT vtkNek5000Reader : public vtkUnstructuredGridAlgorith
 //  static int getNextPatchID(){return(next_patch_id++);}
 
   vtkDataArraySelection* PointDataArraySelection;
-  vtkDataArraySelection* DerivedVariableDataArraySelection;
+  //vtkDataArraySelection* DerivedVariableDataArraySelection;
 
   // update which fields from the data should be used, based on GUI
   void updateVariableStatus();
@@ -253,6 +259,8 @@ class NEK5000READER_EXPORT vtkNek5000Reader : public vtkUnstructuredGridAlgorith
  private:
   vtkNek5000Reader(const vtkNek5000Reader&) = delete;  // Not implemented.
   void operator=(const vtkNek5000Reader&) = delete;  // Not implemented.
+  
+  int SpectralElementIds;
 };
 
 #endif
