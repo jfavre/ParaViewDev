@@ -75,25 +75,26 @@ vtkNek5000Reader::vtkNek5000Reader(){
 
   this->PointDataArraySelection = vtkDataArraySelection::New();
 
-  //this->DerivedVariableDataArraySelection = vtkDataArraySelection::New();
-  //this->DisableAllDerivedVariableArrays();
-
   this->myList = new nek5KList();
 }
 
 //----------------------------------------------------------------------------
 vtkNek5000Reader::~vtkNek5000Reader()
 {
-  free(this->use_variable);
-  free(this->timestep_has_mesh);
-  delete [] this->FileName;
-  delete [] this->DataFileName;
+  if(this->use_variable)
+    delete [] this->use_variable;
+  if(this->timestep_has_mesh)
+    delete [] this->timestep_has_mesh;
+  if(this->FileName)
+    delete [] this->FileName;
+  if(this->DataFileName)
+    delete [] this->DataFileName;
 
   if (this->myList)
   {
     delete this->myList;
   }
-
+      
   if(this->dataArray)
   {
     vtkDebugMacro(<<"~vtkNek5000Reader():: Release memory for dataArrays");
@@ -128,12 +129,13 @@ vtkNek5000Reader::~vtkNek5000Reader()
   }
 
   if(this->var_length)
-    free(this->var_length) ; // delete [] this->var_length;
+    delete [] this->var_length;
   if(this->var_names)
     free(this->var_names);
   this->PointDataArraySelection->Delete();
-
-  //this->DerivedVariableDataArraySelection->Delete();
+  
+  if(this->myBlockPositions)
+    delete [] this->myBlockPositions;
 }
 
 //----------------------------------------------------------------------------
@@ -176,11 +178,8 @@ void vtkNek5000Reader::GetAllTimesAndVariableNames(vtkInformationVector *outputV
   this->TimeStepRange[0] = 0;
   this->TimeStepRange[1] = this->NumberOfTimeSteps-1;
 
-  std::cerr << "vtkNek5000Reader::GetAllTimesAndVariableNames: this->NumberOfTimeSteps = "<<
-                this->NumberOfTimeSteps << std::endl;
-
   this->TimeSteps.resize(this->NumberOfTimeSteps);
-  this->timestep_has_mesh = (bool *)malloc(sizeof(bool)*this->NumberOfTimeSteps);
+  this->timestep_has_mesh =  new bool[this->NumberOfTimeSteps];
 
   for (int i=0; i<(this->NumberOfTimeSteps); i++)
   {
@@ -255,9 +254,6 @@ unsigned long vtkNek5000Reader::GetMTime()
 
   time = this->PointDataArraySelection->GetMTime();
   mTime = ( time > mTime ? time : mTime );
-
-  //time = this->DerivedVariableDataArraySelection->GetMTime();
-  //mTime = ( time > mTime ? time : mTime );
 
   return mTime;
 }
@@ -410,9 +406,6 @@ void vtkNek5000Reader::updateVariableStatus()
 //----------------------------------------------------------------------------
 int vtkNek5000Reader::GetVariableNamesFromData(char* varTags)
 {
-  FILE* dfPtr = nullptr;
-  char  dfName[265];
-  char* scan_ret;
   int   ind = 0;
   char  l_var_name[2];
   int numSFields=0;
@@ -461,7 +454,7 @@ int vtkNek5000Reader::GetVariableNamesFromData(char* varTags)
   for (int i=0; i < 4+numSFields; i++)
     this->var_names[i] = nullptr;
 
-  this->var_length =  (int*)malloc(sizeof(int)*(4+numSFields)) ; //new int[4+numSFields];
+  this->var_length = new int[4+numSFields];
 
   while(ind<len)
   {
@@ -616,17 +609,17 @@ void vtkNek5000Reader::readData(char* dfName)
             read_location = total_header_size + var_offset + long(this->myBlockPositions[j] * l_blocksize );
             dfPtr.seekg(read_location, std::ios_base::beg );
             if (!dfPtr)
-              std::cerr << "block="<< j << ": seekg error at read_location = " << read_location << std::endl;
+              std::cerr << __LINE__ << "block="<< j << ": seekg error for block position = " << this->myBlockPositions[j] << std::endl;
             dfPtr.read( (char *)dataPtr, read_size*sizeof(float));
             if (!dfPtr)
-              std::cerr << __LINE__ << ": read error\n";
+              std::cerr << __LINE__ << ": read error for paylood of " << read_size << " floats = " << read_size*sizeof(float) << std::endl;
 /*
 when reading vectors, such as Velocity, first come all Vx components, then all Vy, then all Vz.
 if reading 2D, it is safer to set the Z component to 0.
 */
             if(strcmp(this->var_names[i], "Velocity") == 0 && !this->MeshIs3D)
               {
-              memset(&dataPtr[read_size], 0, read_size*sizeof(float));    
+              //memset(&dataPtr[read_size], 0, read_size*sizeof(float));    
               }
             dataPtr += this->totalBlockSize * this->var_length[i];
           }
@@ -734,7 +727,7 @@ if reading 2D, it is safer to set the Z component to 0.
     }
   }  // for all vars
 #endif
-  delete [] this->myBlockPositions;
+
 }// vtkNek5000Reader::readData(char* dfName)
 
 //----------------------------------------------------------------------------
@@ -884,6 +877,7 @@ void vtkNek5000Reader::partitionAndReadMesh()
 
   // now that we have our list of blocks, get their positions in the file (their index)
   this->myBlockPositions = new int[this->myNumBlocks];
+  std::cerr << __LINE__ << " newing myBlockPositions" << std::endl;
   for(i=0; i<this->myNumBlocks; i++)
   {
     this->myBlockPositions[i] = blockMap.find(this->myBlockIDs[i])->second;
@@ -904,7 +898,6 @@ void vtkNek5000Reader::partitionAndReadMesh()
     }
   }
 
-  //delete [] proc_numBlocks;
   delete [] tmpBlocks;
   if(map_elements != nullptr)
     delete [] map_elements;
@@ -912,6 +905,7 @@ void vtkNek5000Reader::partitionAndReadMesh()
   // now read the coordinates for all of my blocks
   if(nullptr == this->meshCoords)
   {
+  std::cerr << __LINE__ << " this->meshCoords = new float[" << this->myNumBlocks << "*" << this->totalBlockSize << "*" << "*3]" << std::endl;
     vtkDebugMacro(<< ": partitionAndReadMesh:  ALLOCATE meshCoords[" << this->myNumBlocks <<"*"<< this->totalBlockSize <<"*" <<3 << "]");
     this->meshCoords = new float[this->myNumBlocks * this->totalBlockSize * 3];
   }
@@ -1134,7 +1128,7 @@ int vtkNek5000Reader::RequestInformation(
     timer->StopTimer();
     timer_diff = timer->GetElapsedTime();
 
-    this->use_variable = (bool*) malloc(this->num_vars*sizeof(bool));
+    this->use_variable = new bool[this->num_vars];
 
     vtkDebugMacro(<<"Rank: "<< my_rank <<" :: GetAllTimeSteps time: "<< timer_diff);
 
@@ -1329,10 +1323,15 @@ int vtkNek5000Reader::RequestData(
         if(this->use_variable[i])
           {
           this->dataArray[i] = new float[this->myNumBlocks * this->totalBlockSize * this->var_length[i]];
+          std::cerr<< "variable " << i << " new float[" <<
+                  this->myNumBlocks << " * " <<
+                  this->totalBlockSize << " * " <<
+                  this->var_length[i] << "]\n";
           }
         else
           {
           this->dataArray[i] = nullptr;
+          std::cerr<< "variable " << i << " new float[0] (no allocation)\n";
           }
         }
       }
@@ -1429,60 +1428,6 @@ void vtkNek5000Reader::updateVtuData(vtkUnstructuredGrid* pv_ugrid)
          this->curObj->vars[vid] = false;
          }
        }
-
-      // Remove vorticity if curObj has it, but not in request
-      if(!this->GetDerivedVariableArrayStatus("Vorticity") && this->curObj->vorticity)
-        {
-        // Does PV already have this array?  If so, remove it.
-        if (pv_ugrid->GetPointData()->GetArray("Vorticity") != nullptr)
-        {
-          pv_ugrid->GetPointData()->RemoveArray("Vorticity");
-        }
-        // Do I already have this array?  If so, remove it.
-        if (this->curObj->ugrid->GetPointData()->GetArray("Vorticity") != nullptr)
-        {
-          this->curObj->ugrid->GetPointData()->RemoveArray("Vorticity");
-        }
-        this->curObj->vorticity = false;
-      }
-      // Remove lambda_2 if curObj has it, but not in request
-      if(!this->GetDerivedVariableArrayStatus("lambda_2") && this->curObj->lambda_2)
-      {
-        // Does PV already have this array?  If so, remove it.
-        if (pv_ugrid->GetPointData()->GetArray("lambda_2") != nullptr)
-        {
-          pv_ugrid->GetPointData()->RemoveArray("lambda_2");
-        }
-        // Do I already have this array?  If so, remove it.
-        if (this->curObj->ugrid->GetPointData()->GetArray("lambda_2") != nullptr)
-        {
-          this->curObj->ugrid->GetPointData()->RemoveArray("lambda_2");
-        }
-        this->curObj->lambda_2 = false;
-      }
-       // Remove stress tensor if curObj has it, but not in request
-      if(!this->GetDerivedVariableArrayStatus("Stress Tensor") && this->curObj->stress_tensor)
-      {
-        // Does PV already have this array?  If so, remove it.
-        if (pv_ugrid->GetPointData()->GetArray("Stress Tensor") != nullptr)
-        {
-          pv_ugrid->GetPointData()->RemoveArray("Stress Tensor");
-        }
-    if (pv_ugrid->GetPointData()->GetArray("Stress Tensor Magnitude") != nullptr)
-      {
-      pv_ugrid->GetPointData()->RemoveArray("Stress Tensor Magnitude");
-      }
-        // Do I already have this array?  If so, remove it.
-        if (this->curObj->ugrid->GetPointData()->GetArray("Stress Tensor") != nullptr)
-        {
-          this->curObj->ugrid->GetPointData()->RemoveArray("Stress Tensor");
-        }
-    if (this->curObj->ugrid->GetPointData()->GetArray("Stress Tensor Magnitude") != nullptr)
-        {
-         this->curObj->ugrid->GetPointData()->RemoveArray("Stress Tensor Magnitude");
-        }
-        this->curObj->stress_tensor = false;
-      }
 
       pv_ugrid->ShallowCopy(this->curObj->ugrid);
       this->displayed_step = this->requested_step;
@@ -1703,14 +1648,19 @@ void vtkNek5000Reader::addSpectralElementId(int nelements)
 void vtkNek5000Reader::copyContinuumPoints(vtkPoints* points)
 {
   int index = 0;
-
+  std::cerr<< "begin copyContinuumPoints()\n";
   // for each element/block in the continuum mesh
   for(auto k = 0; k < this->myNumBlocks; ++k)
   {
     int block_offset = k * this->totalBlockSize * 3;  // 3 is for X,Y,Z coordinate components
     // for every point in this element/block
     for(auto i = 0; i < this->totalBlockSize; ++i)
-    {
+    {/*
+      std::cerr<< index << ": " <<
+                  this->meshCoords[block_offset+i] << ", " <<
+                  this->meshCoords[block_offset+this->totalBlockSize+i] << ", " <<
+                  this->meshCoords[block_offset+this->totalBlockSize+this->totalBlockSize+i] << std::endl;
+                  */
     points->InsertPoint(index,
                   this->meshCoords[block_offset+i],  // X val
                   this->meshCoords[block_offset+this->totalBlockSize+i],  // Y val
@@ -1719,6 +1669,7 @@ void vtkNek5000Reader::copyContinuumPoints(vtkPoints* points)
     }
   }
   delete [] this->meshCoords;
+  std::cerr<< "end  copyContinuumPoints()\n";
 }
 
 void vtkNek5000Reader::copyContinuumData(vtkUnstructuredGrid* pv_ugrid)
@@ -1752,6 +1703,7 @@ void vtkNek5000Reader::copyContinuumData(vtkUnstructuredGrid* pv_ugrid)
   {
     if(this->GetPointArrayStatus(jj) == 1)
     {
+      std::cerr<< "copying [" << this->var_names[jj] << "] of size " << this->var_length[jj] << "\n";
       // if this variable is a scalar
       if(this->var_length[jj] == 1)
       {
@@ -1972,7 +1924,7 @@ nek5KObject::~nek5KObject()
   if(this->dataFilename)
   {
     free(this->dataFilename);
-    this->dataFilename = NULL;
+    this->dataFilename = nullptr;
   }
 }
 

@@ -107,8 +107,7 @@ class NEK5000READER_EXPORT vtkNek5000Reader : public vtkUnstructuredGridAlgorith
   void DisableAllPointArrays();
   void EnableAllPointArrays();
 
-  // Description:
-  // Get the number of derived variables available in the input.
+#ifdef unused
   int GetNumberOfDerivedVariableArrays(void);
 
   // Description:
@@ -126,7 +125,7 @@ class NEK5000READER_EXPORT vtkNek5000Reader : public vtkUnstructuredGridAlgorith
   // Turn on/off all derived variable arrays.
   void DisableAllDerivedVariableArrays();
   void EnableAllDerivedVariableArrays();
-
+#endif
   // Description:
   // Get the names of variables stored in the data
   int GetVariableNamesFromData(char* varTags);
@@ -177,7 +176,6 @@ class NEK5000READER_EXPORT vtkNek5000Reader : public vtkUnstructuredGridAlgorith
 //  static int getNextPatchID(){return(next_patch_id++);}
 
   vtkDataArraySelection* PointDataArraySelection;
-  //vtkDataArraySelection* DerivedVariableDataArraySelection;
 
   // update which fields from the data should be used, based on GUI
   void updateVariableStatus();

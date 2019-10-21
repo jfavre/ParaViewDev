@@ -5,5 +5,8 @@ LIBRARY_NAME
 DEPENDS
   VTK::CommonCore
   VTK::CommonExecutionModel
+  VTK::FiltersGeometry
+  VTK::RenderingCore
 PRIVATE_DEPENDS
   ParaView::Core
+  ParaView::VTKExtensionsDefault
